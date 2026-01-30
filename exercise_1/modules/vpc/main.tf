@@ -1,6 +1,6 @@
 resource "aws_vpc" "main" {
   region = var.region
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.vpc_cidr_block
 }
 
 resource "aws_vpc_endpoint" "s3" {
@@ -31,7 +31,7 @@ resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "internet-gateway"
+    Name = "IGW"
   }
 }
 
@@ -44,7 +44,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "rt-public"
+    Name = "RT-public"
   }
 }
 
@@ -80,7 +80,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "rt-private"
+    Name = "RT-private"
   }
 }
 
@@ -125,7 +125,7 @@ resource "aws_security_group" app_server_sg {
     protocol  = "tcp"
     security_groups = [aws_security_group.load_balancer_sg.id]
   }
-  
+
   egress {
     from_port   = 0
     to_port     = 0
