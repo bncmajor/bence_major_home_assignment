@@ -12,6 +12,6 @@ provider "aws" {
 }
 
 module "vpc" {
-    source = "./modules/vpc"
-    region = "us-east-1"
+  source = "./modules/vpc"
+  region = "us-east-1"
 }
