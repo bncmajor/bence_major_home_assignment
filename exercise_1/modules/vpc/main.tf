@@ -65,9 +65,20 @@ resource "aws_subnet" "private" {
     }
 }
 
+resource "aws_eip" "main" {
+  for_each = var.private_subnets
+  domain   = "vpc"
+}
+
 resource "aws_nat_gateway" "main" {
   for_each = var.private_subnets
   subnet_id = aws_subnet.private[each.key].id
+  allocation_id = aws_eip.main[each.key].id
+
+  tags = {
+    Name = "nat-gateway-${var.region}${each.key}"
+  }
+  
 }
 
 resource "aws_route_table" "private" {
