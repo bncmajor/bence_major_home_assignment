@@ -71,8 +71,8 @@ resource "aws_eip" "main" {
 }
 
 resource "aws_nat_gateway" "main" {
-  for_each = var.private_subnets
-  subnet_id = aws_subnet.private[each.key].id
+  for_each = var.public_subnets
+  subnet_id = aws_subnet.public[each.key].id
   allocation_id = aws_eip.main[each.key].id
 
   tags = {
@@ -104,46 +104,54 @@ resource "aws_route_table_association" "private" {
 
 resource "aws_security_group" "load_balancer_sg" {
   vpc_id = aws_vpc.main.id
+}
 
-  ingress {
-    from_port = 80
-    to_port   = 80
-    protocol  = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_vpc_security_group_ingress_rule" "load_balancer_http_ingress" {
+  security_group_id = aws_security_group.load_balancer_sg.id
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+  cidr_ipv4   = "0.0.0.0/0"
+}
 
-  ingress {
-    from_port = 443
-    to_port   = 443
-    protocol  = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_vpc_security_group_ingress_rule" "load_balancer_https_ingress" {
+  security_group_id = aws_security_group.load_balancer_sg.id
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  cidr_ipv4   = "0.0.0.0/0"
+}
 
-  egress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  
+resource "aws_vpc_security_group_egress_rule" "load_balancer_egress" {
+  security_group_id = aws_security_group.load_balancer_sg.id
+  ip_protocol       = "-1"
+  cidr_ipv4   = "0.0.0.0/0"
 }
 
 resource "aws_security_group" app_server_sg {
   vpc_id = aws_vpc.main.id
-  ingress {
-    from_port = 80
-    to_port   = 80
-    protocol  = "tcp"
-    security_groups = [aws_security_group.load_balancer_sg.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
+resource "aws_vpc_security_group_ingress_rule" app_server_http_ingress {
+  security_group_id = aws_security_group.app_server_sg.id
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+  referenced_security_group_id = aws_security_group.load_balancer_sg.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" app_server_https_ingress {
+  security_group_id = aws_security_group.app_server_sg.id
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  referenced_security_group_id = aws_security_group.load_balancer_sg.id
+}
+
+resource "aws_vpc_security_group_egress_rule" app_server_http_egress {
+  security_group_id = aws_security_group.app_server_sg.id
+  ip_protocol       = "-1"
+  cidr_ipv4        = "0.0.0.0/0"
+}
 
 

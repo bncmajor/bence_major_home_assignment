@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "main" {
-    bucket = "filesystem-archive-bucket"
+    bucket = var.s3_bucket_name
     object_lock_enabled = true
 
     tags = {
@@ -25,6 +25,15 @@ resource "aws_s3_bucket_object_lock_configuration" "main" {
       days = 180
         }
     } 
+}
+
+resource "aws_s3_bucket_public_access_block" "main" {
+  bucket = aws_s3_bucket.main.id
+ 
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "main" {
@@ -53,7 +62,7 @@ data "aws_iam_policy_document" "bucket_policy" {
         actions = ["s3:PutObject"]
         principals {
             type        = "AWS"
-            identifiers = ["arn:aws:iam::123456789012:role/backup_uploader"]
+            identifiers = [var.backup_uploader_role_arn]
         }
         condition {
             test = "Null"
