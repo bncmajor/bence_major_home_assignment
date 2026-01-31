@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "main" {
-    bucket = "filesystem_archive_bucket"
+    bucket = "filesystem-archive-bucket"
     object_lock_enabled = true
 
     tags = {
