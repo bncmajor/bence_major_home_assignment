@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-server-deployment
+  labels:
+    app: backend-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-server
+  template:
+    metadata:
+      labels:
+        app: backend-server
+    spec:
+      containers:
+        - image: rest-1.0:latest
+          name: backend-server
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
