@@ -43,3 +43,53 @@ resource "aws_s3_bucket_lifecycle_configuration" "main" {
         }
     }
 }
+
+data "aws_iam_policy_document" "bucket_policy" {
+    statement {
+        sid = "BlockNonUploaderUploads"
+        effect = "Deny"
+        actions = ["s3:PutObject"]
+        principals {
+            type        = "AWS"
+            identifiers = ["*"]
+        }
+        condition {
+            test = "StringNotEquals"
+            variable = "aws:PrincipalArn"
+            values = ["arn:aws:iam::123456789012:role/backup_uploader"]
+        }
+        resources = ["${aws_s3_bucket.main.arn} + /*"]
+    }
+
+    statement {
+        sid = "EnforceWriteOnly"
+        effect = "Deny"
+        actions = ["s3:PutObject"]
+        principals {
+            type        = "AWS"
+            identifiers = ["*"]
+        }
+        condition {
+            test = "StringNotEquals"
+            variable = "s3:if-none-match"
+            values = ["*"]
+        }
+        resources = ["${aws_s3_bucket.main.arn} + /*"]
+    }
+
+    statement {
+        sid = "BlockDeletes"
+        effect = "Deny"
+        actions = ["s3:DeleteObject"]
+        principals {
+            type        = "AWS"
+            identifiers = ["*"]
+        }
+        resources = ["${aws_s3_bucket.main.arn} + /*"]
+    }
+}
+
+resource "aws_s3_bucket_policy" "main" {
+    bucket = aws_s3_bucket.main.id
+    policy = data.aws_iam_policy_document.bucket_policy.json
+}
