@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_s3_bucket" "main" {
     bucket = "filesystem-archive-bucket"
     object_lock_enabled = true
@@ -46,46 +48,19 @@ resource "aws_s3_bucket_lifecycle_configuration" "main" {
 
 data "aws_iam_policy_document" "bucket_policy" {
     statement {
-        sid = "BlockNonUploaderUploads"
-        effect = "Deny"
+        sid = "AllowUploadsFromBackupUploader"
+        effect = "Allow"
         actions = ["s3:PutObject"]
         principals {
             type        = "AWS"
-            identifiers = ["*"]
+            identifiers = ["arn:aws:iam::123456789012:role/backup_uploader"]
         }
         condition {
-            test = "StringNotEquals"
-            variable = "aws:PrincipalArn"
-            values = ["arn:aws:iam::123456789012:role/backup_uploader"]
-        }
-        resources = ["${aws_s3_bucket.main.arn} + /*"]
-    }
-
-    statement {
-        sid = "EnforceWriteOnly"
-        effect = "Deny"
-        actions = ["s3:PutObject"]
-        principals {
-            type        = "AWS"
-            identifiers = ["*"]
-        }
-        condition {
-            test = "StringNotEquals"
+            test = "Null"
             variable = "s3:if-none-match"
-            values = ["*"]
+            values = ["false"]
         }
-        resources = ["${aws_s3_bucket.main.arn} + /*"]
-    }
-
-    statement {
-        sid = "BlockDeletes"
-        effect = "Deny"
-        actions = ["s3:DeleteObject"]
-        principals {
-            type        = "AWS"
-            identifiers = ["*"]
-        }
-        resources = ["${aws_s3_bucket.main.arn} + /*"]
+        resources = ["${aws_s3_bucket.main.arn}/*"]
     }
 }
 
