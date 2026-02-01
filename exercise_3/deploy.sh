@@ -3,14 +3,14 @@ DEPLOY_FINISHED="false"
 
 get_pod_status(){
     POD_STATUS=$(kubectl get pods -l 'app=backend-server' -o jsonpath='{.items[*].status.phase}')
-    if [[ ${POD_STATUS} != "Running" ]]; then
+    if [[ ${POD_STATUS} == "Running" ]]; then
         echo "✅ Application deployed successfully."
         DEPLOY_FINISHED="true"
-    elif [[${POD_STATUS} != "Pending" ]]; then
-        echo "Application still deploying..."
-    else
-        echo "❌ Application is not deployed successfully."
+    elif [[ "$POD_STATUS" == "ImagePullBackOff" ]] || [[ "$POD_STATUS" == "CrashLoopBackOff" ]]; then
+        echo "❌ Deployment failed: $POD_STATUS"
         exit 1
+    else
+        echo "⏳ Status: ${POD_STATUS:-Pending}..."
     fi
 }
 

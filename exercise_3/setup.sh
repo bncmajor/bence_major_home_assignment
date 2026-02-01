@@ -21,12 +21,6 @@ install_minikube_darwin_arm64(){
     echo "✅ Minikube is installed."
 }
 
-if ! command -v kubectl &> /dev/null; then
-    echo "❌ kubectl is not installed."
-else
-    echo "✅ kubectl is installed."
-fi
-
 OS_NAME="$(uname -s)"
 ARCH_NAME="$(uname -m)"
 if ! command -v minikube >/dev/null 2>&1
@@ -71,3 +65,8 @@ else
     echo "Minikube is already running."
 fi
 
+if ! command -v kubectl &> /dev/null; then
+    echo "❌ kubectl is not installed."
+else
+    echo "✅ kubectl is installed."
+fi

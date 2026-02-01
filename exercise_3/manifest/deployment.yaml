@@ -17,6 +17,25 @@ spec:
       containers:
         - image: rest-1.0:latest
           name: backend-server
+          resources:
+            requests:
+              cpu: 50m
+              memory: 50Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
+          livenessProbe:
+            httpGet:
+              path: /hello-world
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /hello-world
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

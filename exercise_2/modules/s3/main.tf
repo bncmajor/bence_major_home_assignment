@@ -22,7 +22,7 @@ resource "aws_s3_bucket_object_lock_configuration" "main" {
     rule {
     default_retention {
       mode = "COMPLIANCE"
-      days = 180
+      days = 179
         }
     } 
 }

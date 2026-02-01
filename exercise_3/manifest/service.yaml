@@ -3,7 +3,6 @@ kind: Service
 metadata:
   name: backend-server-service
 spec:
-  type: NodePort
   selector:
     app: backend-server
   ports:
