@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
+
 echo "🚀 Checking if registry is enabled in Minikube..."
 STATUS=$(minikube addons list -o json | jq .registry.Status 2>/dev/null)
 if ! [[ ${STATUS}  =~ "enabled" ]]; then

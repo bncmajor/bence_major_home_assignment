@@ -5,12 +5,12 @@ output "vpc_id" {
 
 output "public_subnet_ids" {
   description = "IDs of public subnets"
-  value       = [aws_subnet.public["a"].id, aws_subnet.public["b"].id]
+  value       = values(aws_subnet.public)[*].id
 }
 
 output "private_subnet_ids" {
   description = "IDs of private subnets"
-  value       = [aws_subnet.private["a"].id, aws_subnet.private["b"].id]
+  value       = values(aws_subnet.private)[*].id
 }
  
 output "load_balancer_sg_id" {

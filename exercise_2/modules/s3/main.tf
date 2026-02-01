@@ -16,9 +16,9 @@ resource "aws_s3_bucket_versioning" "main" {
     }
 }
 
+# Intentional 179 days for retention period to avoid race-condition with the lifecycle policy expiration.
 resource "aws_s3_bucket_object_lock_configuration" "main" {
     bucket = aws_s3_bucket.main.id
-
     rule {
     default_retention {
       mode = "COMPLIANCE"
